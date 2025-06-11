@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+torch
+torchvision
+numpy
+opencv-python
+Pillow
+python-multipart
+cloudinary
+onnxruntime
+scipy
+python-dotenv
+requests
+tqdm
+setuptools
+scikit-learn
