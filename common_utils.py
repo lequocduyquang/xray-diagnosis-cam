@@ -17,6 +17,7 @@ cloudinary.config(
 MODEL_PATHS = {
     "resnet50_v1": "models/resnet50_v1.pth",
     "resnet50_v2": "models/resnet50_v2.pth",
+    "resnet50": "models/resnet50_v1.pth",
     "densenet121": "models/densenet121.pth",
 }
 
@@ -29,6 +30,9 @@ TRANSFORM = transforms.Compose([
 MODELS_CACHE = {}
 
 def get_model(model_name):
+    # Convert model name to lowercase for case-insensitive matching
+    model_name = model_name.lower()
+    
     if model_name not in MODELS_CACHE:
         if model_name == "resnet50_v1" or model_name == "resnet50_v2":
             weights = ResNet50_Weights.DEFAULT

@@ -29,7 +29,7 @@ Content-Type: multipart/form-data
 
 Parameters:
 - image: File (required) - Ảnh X-quang
-- model_name: String (required) - Tên model ("resnet50_v1", "resnet50_v2", "densenet121")
+- model_name: String (required) - Tên model ("resnet50_v1", "resnet50_v2", "densenet121") - case insensitive
 
 Response:
 {
@@ -46,7 +46,7 @@ Content-Type: multipart/form-data
 
 Parameters:
 - image: File (required) - Ảnh X-quang
-- model_name: String (required) - Tên model
+- model_name: String (required) - Tên model (case insensitive)
 - n_components: Integer (optional, default=3) - Số principal components
 
 Response:
