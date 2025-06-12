@@ -11,7 +11,7 @@ def generate_eigencam(image_path, model_name):
     EigenCAM uses the principal components of the feature maps to generate class-agnostic explanations.
     """
     session = get_onnx_session(model_name)
-    input_tensor = preprocess_image(image_path, use_onnx=True)  # Use 224x224 for ONNX models
+    input_tensor = preprocess_image(image_path)  # Use 160x160 for all models
     input_numpy = input_tensor.numpy()  # Convert to numpy array for ONNX
     input_name = session.get_inputs()[0].name
 
@@ -66,7 +66,7 @@ def generate_eigencam_pca(image_path, model_name, n_components=3):
     else:
         target_layer = model.features
 
-    input_tensor = preprocess_image(image_path).to(device)
+    input_tensor = preprocess_image(image_path).to(device)  # Use 160x160 for all models
     
     # Hook để lấy activations
     activations = []
