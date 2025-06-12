@@ -34,7 +34,13 @@ def get_model(model_name):
     model_name = model_name.lower()
     if model_name == "resnet50":
         model_name = "resnet50_v1"
-    
+
+    # Xóa tất cả model cũ khỏi cache để tiết kiệm RAM
+    for k in list(MODELS_CACHE.keys()):
+        if k != model_name:
+            del MODELS_CACHE[k]
+            gc.collect()
+
     if model_name not in MODELS_CACHE:
         if model_name == "resnet50_v1" or model_name == "resnet50_v2":
             weights = ResNet50_Weights.DEFAULT
