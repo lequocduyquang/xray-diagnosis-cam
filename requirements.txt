@@ -14,3 +14,5 @@ requests
 tqdm
 setuptools
 scikit-learn
+psutil
+onnx

@@ -26,21 +26,15 @@ ONNX_PATHS = {
     # "resnet50_v1": "models/resnet50.onnx",
     # "resnet50_v2": "models/resnet50.onnx",
     # "resnet50": "models/resnet50.onnx",
-    "resnet50_v1": "models/densenet121.onnx", # Temporary using this for test low performance
-    "resnet50_v2": "models/densenet121.onnx",
-    "resnet50": "models/densenet121.onnx",
-    "densenet121": "models/densenet121.onnx",
+    "resnet50_v1": "models/densenet121_160x160.onnx", # Temporary using this for test low performance
+    "resnet50_v2": "models/densenet121_160x160.onnx",
+    "resnet50": "models/densenet121_160x160.onnx",
+    "densenet121": "models/densenet121_160x160.onnx",
 }
 
+# Single transform for both PyTorch and ONNX models (160x160)
 TRANSFORM = transforms.Compose([
     transforms.Resize((160, 160)),
-    transforms.ToTensor(),
-    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-])
-
-# Transform for ONNX models (224x224 input size)
-ONNX_TRANSFORM = transforms.Compose([
-    transforms.Resize((224, 224)),
     transforms.ToTensor(),
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
 ])
@@ -92,19 +86,27 @@ def get_onnx_session(model_name):
             del ONNX_SESSIONS[k]
             gc.collect()
     if model_name not in ONNX_SESSIONS:
-        session = ort.InferenceSession(ONNX_PATHS[model_name], providers=['CPUExecutionProvider'])
+        # Create session with dynamic shapes support
+        session_options = ort.SessionOptions()
+        session_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+        
+        session = ort.InferenceSession(
+            ONNX_PATHS[model_name], 
+            providers=['CPUExecutionProvider'],
+            sess_options=session_options
+        )
+        
+        # Check input shape
+        input_meta = session.get_inputs()[0]
+        print(f"ONNX model {model_name} input shape: {input_meta.shape}")
+        
         ONNX_SESSIONS[model_name] = session
     return ONNX_SESSIONS[model_name]
 
-def preprocess_image(image_path, use_onnx=False):
+def preprocess_image(image_path):
     try:
         image = Image.open(image_path).convert("RGB")
-        if use_onnx:
-            # Use 224x224 for ONNX models
-            return ONNX_TRANSFORM(image).unsqueeze(0)
-        else:
-            # Use 160x160 for PyTorch models
-            return TRANSFORM(image).unsqueeze(0)
+        return TRANSFORM(image).unsqueeze(0)  # Always use 160x160
     except FileNotFoundError:
         raise FileNotFoundError(f"Image file not found: {image_path}")
     except Exception as e:
