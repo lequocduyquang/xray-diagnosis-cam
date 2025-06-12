@@ -12,7 +12,7 @@ import cv2
 
 from gradcam_utils import generate_gradcam_and_upload
 from approxcam_utils import generate_approxcam_and_upload
-from eigencam_utils import generate_eigencam_and_upload, generate_eigencam_pca_and_upload
+from eigencam_utils import generate_eigencam_and_upload
 
 app = FastAPI(title="Explainable AI API",)
 

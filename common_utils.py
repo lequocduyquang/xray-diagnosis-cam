@@ -84,3 +84,11 @@ def cleanup(*args):
     for obj in args:
         del obj
     gc.collect()
+
+# Preload all models at startup
+for model_name in ["resnet50_v1", "resnet50_v2", "resnet50", "densenet121"]:
+    try:
+        get_model(model_name)
+        print(f"Preloaded model: {model_name}")
+    except Exception as e:
+        print(f"Failed to preload model {model_name}: {e}")
