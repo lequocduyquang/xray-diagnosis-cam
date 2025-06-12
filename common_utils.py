@@ -6,6 +6,7 @@ from PIL import Image
 import cloudinary.uploader
 import os
 import gc
+import onnxruntime as ort
 
 # Cloudinary config (chỉ cần gọi 1 lần)
 cloudinary.config(
@@ -19,6 +20,13 @@ MODEL_PATHS = {
     "resnet50_v2": "models/resnet50_v2.pth",
     "resnet50": "models/resnet50_v1.pth",
     "densenet121": "models/densenet121.pth",
+}
+
+ONNX_PATHS = {
+    "resnet50_v1": "models/resnet50_v1.onnx",
+    "resnet50_v2": "models/resnet50_v2.onnx",
+    "resnet50": "models/resnet50_v1.onnx",
+    "densenet121": "models/densenet121.onnx",
 }
 
 TRANSFORM = transforms.Compose([
@@ -62,6 +70,21 @@ def get_model(model_name):
         model.eval()
         MODELS_CACHE[model_name] = model
     return MODELS_CACHE[model_name]
+
+ONNX_SESSIONS = {}
+
+def get_onnx_session(model_name):
+    model_name = model_name.lower()
+    if model_name == "resnet50":
+        model_name = "resnet50_v1"
+    for k in list(ONNX_SESSIONS.keys()):
+        if k != model_name:
+            del ONNX_SESSIONS[k]
+            gc.collect()
+    if model_name not in ONNX_SESSIONS:
+        session = ort.InferenceSession(ONNX_PATHS[model_name], providers=['CPUExecutionProvider'])
+        ONNX_SESSIONS[model_name] = session
+    return ONNX_SESSIONS[model_name]
 
 def preprocess_image(image_path):
     try:
