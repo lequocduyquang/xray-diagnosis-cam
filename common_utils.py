@@ -32,6 +32,8 @@ MODELS_CACHE = {}
 def get_model(model_name):
     # Convert model name to lowercase for case-insensitive matching
     model_name = model_name.lower()
+    if model_name == "resnet50":
+        model_name = "resnet50_v1"
     
     if model_name not in MODELS_CACHE:
         if model_name == "resnet50_v1" or model_name == "resnet50_v2":
