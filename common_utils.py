@@ -23,9 +23,9 @@ MODEL_PATHS = {
 }
 
 ONNX_PATHS = {
-    "resnet50_v1": "models/resnet50_v1.onnx",
-    "resnet50_v2": "models/resnet50_v2.onnx",
-    "resnet50": "models/resnet50_v1.onnx",
+    "resnet50_v1": "models/resnet50.onnx",
+    "resnet50_v2": "models/resnet50.onnx",
+    "resnet50": "models/resnet50.onnx",
     "densenet121": "models/densenet121.onnx",
 }
 
