@@ -11,7 +11,7 @@ def generate_eigencam(image_path, model_name):
     EigenCAM uses the principal components of the feature maps to generate class-agnostic explanations.
     """
     session = get_onnx_session(model_name)
-    input_tensor = preprocess_image(image_path)  # shape (1, 3, 160, 160) - PyTorch tensor
+    input_tensor = preprocess_image(image_path, use_onnx=True)  # Use 224x224 for ONNX models
     input_numpy = input_tensor.numpy()  # Convert to numpy array for ONNX
     input_name = session.get_inputs()[0].name
 

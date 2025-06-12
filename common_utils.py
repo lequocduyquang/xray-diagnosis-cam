@@ -38,6 +38,13 @@ TRANSFORM = transforms.Compose([
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
 ])
 
+# Transform for ONNX models (224x224 input size)
+ONNX_TRANSFORM = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+])
+
 MODELS_CACHE = {}
 
 def get_model(model_name):
@@ -89,10 +96,15 @@ def get_onnx_session(model_name):
         ONNX_SESSIONS[model_name] = session
     return ONNX_SESSIONS[model_name]
 
-def preprocess_image(image_path):
+def preprocess_image(image_path, use_onnx=False):
     try:
         image = Image.open(image_path).convert("RGB")
-        return TRANSFORM(image).unsqueeze(0)
+        if use_onnx:
+            # Use 224x224 for ONNX models
+            return ONNX_TRANSFORM(image).unsqueeze(0)
+        else:
+            # Use 160x160 for PyTorch models
+            return TRANSFORM(image).unsqueeze(0)
     except FileNotFoundError:
         raise FileNotFoundError(f"Image file not found: {image_path}")
     except Exception as e:
