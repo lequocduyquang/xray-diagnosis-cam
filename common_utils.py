@@ -16,21 +16,21 @@ cloudinary.config(
 )
 
 MODEL_PATHS = {
-    "resnet50_v1": "models/resnet50_v1.pth",
-    "resnet50_v2": "models/resnet50_v2.pth",
-    "resnet50": "models/resnet50_v1.pth",
+    "resnet50_v1": "models/densenet121.pth",
+    "resnet50_v2": "models/densenet121.pth",
+    "resnet50": "models/densenet121.pth",
     "densenet121": "models/densenet121.pth",
 }
 
-ONNX_PATHS = {
-    # "resnet50_v1": "models/resnet50.onnx",
-    # "resnet50_v2": "models/resnet50.onnx",
-    # "resnet50": "models/resnet50.onnx",
-    "resnet50_v1": "models/densenet121_160x160.onnx", # Temporary using this for test low performance
-    "resnet50_v2": "models/densenet121_160x160.onnx",
-    "resnet50": "models/densenet121_160x160.onnx",
-    "densenet121": "models/densenet121_160x160.onnx",
-}
+# ONNX_PATHS = {
+#     # "resnet50_v1": "models/resnet50.onnx",
+#     # "resnet50_v2": "models/resnet50.onnx",
+#     # "resnet50": "models/resnet50.onnx",
+#     "resnet50_v1": "models/densenet121_160x160.onnx", # Temporary using this for test low performance
+#     "resnet50_v2": "models/densenet121_160x160.onnx",
+#     "resnet50": "models/densenet121_160x160.onnx",
+#     "densenet121": "models/densenet121_160x160.onnx",
+# }
 
 # Single transform for both PyTorch and ONNX models (160x160)
 TRANSFORM = transforms.Compose([

@@ -7,36 +7,55 @@ from common_utils import get_model, preprocess_image, upload_to_cloudinary, clea
 
 def generate_eigencam(image_path, model_name):
     """
-    Generate Eigen-CAM heatmap for the given image and ONNX model.
+    Generate Eigen-CAM heatmap for the given image and model.
     EigenCAM uses the principal components of the feature maps to generate class-agnostic explanations.
     """
-    session = get_onnx_session(model_name)
-    input_tensor = preprocess_image(image_path)  # Use 160x160 for all models
-    input_numpy = input_tensor.numpy()  # Convert to numpy array for ONNX
-    input_name = session.get_inputs()[0].name
+    device = torch.device("cpu")
+    model = get_model(model_name).to(device)
+    model.eval()
 
+    # Xác định target layer - sử dụng layer cuối cùng của feature extractor
+    if "resnet" in model_name:
+        # ResNet: sử dụng layer4 (last convolutional layer)
+        target_layer = model.layer4[-1]
+    else:
+        # DenseNet: sử dụng features (last convolutional layer)
+        target_layer = model.features
+
+    input_tensor = preprocess_image(image_path).to(device)
+    
+    # Hook để lấy activations
+    activations = []
+    
+    def forward_hook(module, input, output):
+        activations.append(output)
+    
+    # Register hook
+    target_layer.register_forward_hook(forward_hook)
+    
     # Forward pass
-    ort_outs = session.run(None, {input_name: input_numpy})
-    acts = ort_outs[0]  # Expect shape: (1, C, H, W)
-
-    if len(acts.shape) != 4:
-        raise RuntimeError("ONNX model output does not contain feature maps for EigenCAM.")
-
+    with torch.no_grad():
+        output = model(input_tensor)
+    
+    # Lấy activations từ hook
+    acts = activations[0]  # Shape: (1, C, H, W)
+    
+    # EigenCAM: sử dụng tất cả activation maps
     # Reshape activations: (1, C, H, W) -> (C, H*W)
     acts_reshaped = acts.squeeze(0).reshape(acts.shape[1], -1)
-
+    
     # Tính tổng tất cả activation maps (class-agnostic)
-    heatmap = np.sum(acts_reshaped, axis=0)
-
+    heatmap = torch.sum(acts_reshaped, dim=0).detach().cpu().numpy()
+    
     # Reshape heatmap về kích thước 2D ban đầu
     h, w = acts.shape[2], acts.shape[3]
     heatmap = heatmap.reshape(h, w)
-
+    
     # Chuẩn hóa heatmap
     heatmap = np.maximum(heatmap, 0)  # ReLU
     if np.max(heatmap) > 0:
         heatmap = heatmap / np.max(heatmap)
-
+    
     # Visualization và lưu ảnh
     img = cv2.imread(image_path)
     heatmap_resized = cv2.resize(heatmap, (img.shape[1], img.shape[0]))
@@ -47,7 +66,7 @@ def generate_eigencam(image_path, model_name):
     result_path = f"eigencam_{uuid.uuid4().hex}.jpeg"
     cv2.imwrite(result_path, superimposed_img)
 
-    cleanup(input_tensor, input_numpy, acts)
+    cleanup(model, input_tensor, acts)
 
     return result_path
 
