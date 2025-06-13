@@ -1,7 +1,5 @@
 import torch
 from torchvision import models, transforms
-from torchvision.models.resnet import ResNet50_Weights
-from torchvision.models.densenet import DenseNet121_Weights
 from PIL import Image
 import cloudinary.uploader
 import os
@@ -55,14 +53,14 @@ def get_model(model_name):
 
     if model_name not in MODELS_CACHE:
         if model_name == "resnet50_v1" or model_name == "resnet50_v2":
-            weights = ResNet50_Weights.DEFAULT
+            weights = None
             model = models.resnet50(weights=weights)
             model.fc = torch.nn.Sequential(
                 torch.nn.Dropout(0.3),
                 torch.nn.Linear(model.fc.in_features, 2)
             )
         elif model_name == "densenet121":
-            weights = DenseNet121_Weights.DEFAULT
+            weights = None
             model = models.densenet121(weights=weights)
             model.classifier = torch.nn.Sequential(
                 torch.nn.Dropout(0.3),
